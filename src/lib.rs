@@ -1,13 +1,11 @@
 #![cfg_attr(not(test), no_std)]
 
 mod alert;
-mod config1;
-mod config2;
+mod config;
 mod register;
 
-pub use crate::alert::Alert;
-pub use crate::config1::Config1;
-pub use crate::config2::Config2;
+pub use crate::alert::{AlertConfig, AlertLimit};
+pub use crate::config::{Config1, Config2};
 use crate::register::Register;
 
 #[cfg(not(feature = "async"))]
@@ -59,12 +57,22 @@ where
     }
 
     #[inline(always)]
-    pub async fn set_alert1(&mut self, alert: &Alert) -> Result<(), E> {
+    pub async fn set_limit1(&mut self, limit: &AlertLimit) -> Result<(), E> {
+        self.write_u16(Register::Limit1, limit.to_u16()).await
+    }
+
+    #[inline(always)]
+    pub async fn set_limit2(&mut self, limit: &AlertLimit) -> Result<(), E> {
+        self.write_u16(Register::Limit2, limit.to_u16()).await
+    }
+
+    #[inline(always)]
+    pub async fn set_alert1(&mut self, alert: &AlertConfig) -> Result<(), E> {
         self.write_u16(Register::Alert1, alert.to_u16()).await
     }
 
     #[inline(always)]
-    pub async fn set_alert2(&mut self, alert: &Alert) -> Result<(), E> {
+    pub async fn set_alert2(&mut self, alert: &AlertConfig) -> Result<(), E> {
         self.write_u16(Register::Alert2, alert.to_u16()).await
     }
 

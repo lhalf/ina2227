@@ -1,6 +1,6 @@
 use embedded_hal::i2c::ErrorKind;
 use embedded_hal_mock::eh1::i2c;
-use ina2227::{Alert, INA2227};
+use ina2227::{AlertConfig, INA2227};
 
 const DEFAULT_ADDRESS: u8 = 0x40;
 
@@ -16,7 +16,7 @@ fn set_alert1_write_failure() {
 
     assert_eq!(
         ErrorKind::Other,
-        ina2227.set_alert1(&Alert::default()).unwrap_err()
+        ina2227.set_alert1(&AlertConfig::default()).unwrap_err()
     );
 
     i2c.done();
@@ -34,7 +34,7 @@ fn set_alert2_write_failure() {
 
     assert_eq!(
         ErrorKind::Other,
-        ina2227.set_alert2(&Alert::default()).unwrap_err()
+        ina2227.set_alert2(&AlertConfig::default()).unwrap_err()
     );
 
     i2c.done();

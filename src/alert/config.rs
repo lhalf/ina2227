@@ -1,10 +1,10 @@
 #[derive(Debug, Default)]
-pub struct Alert {
+pub struct AlertConfig {
     pub channel: CHANNEL,
     pub alert_mask: ALERT_MASK,
 }
 
-impl Alert {
+impl AlertConfig {
     pub fn to_u16(&self) -> u16 {
         ((self.channel as u16) << 3) | (self.alert_mask as u16)
     }
@@ -41,7 +41,7 @@ mod tests {
 
     #[test]
     fn alert_to_u16() {
-        let alert = Alert {
+        let alert = AlertConfig {
             channel: CHANNEL::Channel2,
             alert_mask: ALERT_MASK::PowerOverLimit,
         };
@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn alert_default_matches_datasheet() {
-        let alert = Alert::default();
+        let alert = AlertConfig::default();
         assert_eq!(alert.to_u16(), 0x0000);
     }
 }
