@@ -1,9 +1,11 @@
 #![cfg_attr(not(test), no_std)]
 
+mod alert;
 mod config1;
 mod config2;
 mod register;
 
+pub use crate::alert::Alert;
 pub use crate::config1::Config1;
 pub use crate::config2::Config2;
 use crate::register::Register;
@@ -54,6 +56,16 @@ where
     #[inline(always)]
     pub async fn is_device_id_ok(&mut self) -> bool {
         self.device_id().await.is_ok_and(|id| id == DEVICE_ID)
+    }
+
+    #[inline(always)]
+    pub async fn set_alert1(&mut self, alert: &Alert) -> Result<(), E> {
+        self.write_u16(Register::Alert1, alert.to_u16()).await
+    }
+
+    #[inline(always)]
+    pub async fn set_alert2(&mut self, alert: &Alert) -> Result<(), E> {
+        self.write_u16(Register::Alert2, alert.to_u16()).await
     }
 
     #[inline(always)]
