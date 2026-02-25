@@ -2,6 +2,13 @@
 name = "ina2227"
 version = "0.0.0"
 edition = "2024"
+description = "Texas Instruments INA2227 driver."
+license = "MIT"
+repository = "https://github.com/lhalf/ina2227"
+keywords = ["embedded"]
+categories = ["embedded", "no-std", "asynchronous"]
+readme = "README.md"
+exclude = ["justfile", "/.github", ".gitignore"]
 
 [features]
 async = ["dep:embedded-hal-async"]
