@@ -3,4 +3,13 @@ name = "ina2227"
 version = "0.0.0"
 edition = "2024"
 
+[features]
+async = ["dep:embedded-hal-async"]
+
 [dependencies]
+embedded-hal = { version = "1.0.0", default-features = false }
+embedded-hal-async = { version = "1.0.0", default-features = false, optional = true }
+maybe-async-cfg = { version = "0.2.5", default-features = false }
+
+[dev-dependencies]
+embedded-hal-mock = { version = "0.11.1", default-features = false, features = ["eh1"] }
