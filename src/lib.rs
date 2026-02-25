@@ -1,7 +1,11 @@
 #![cfg_attr(not(test), no_std)]
 
+mod config1;
+mod config2;
 mod register;
 
+pub use crate::config1::Config1;
+pub use crate::config2::Config2;
 use crate::register::Register;
 
 #[cfg(not(feature = "async"))]
@@ -53,6 +57,16 @@ where
     }
 
     #[inline(always)]
+    pub async fn set_config1(&mut self, config1: &Config1) -> Result<(), E> {
+        self.write_u16(Register::Config1, config1.to_u16()).await
+    }
+
+    #[inline(always)]
+    pub async fn set_config2(&mut self, config2: &Config2) -> Result<(), E> {
+        self.write_u16(Register::Config2, config2.to_u16()).await
+    }
+
+    #[inline(always)]
     async fn read_u16(&mut self, register: Register) -> Result<u16, E> {
         let mut buffer = [0u8; 2];
 
@@ -61,5 +75,15 @@ where
             .await?;
 
         Ok(u16::from_be_bytes(buffer))
+    }
+
+    #[inline(always)]
+    async fn write_u16(&mut self, register: Register, value: u16) -> Result<(), E> {
+        self.i2c
+            .write(
+                self.address,
+                &[register as u8, (value >> 8) as u8, value as u8],
+            )
+            .await
     }
 }
