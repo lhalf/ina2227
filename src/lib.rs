@@ -1,9 +1,7 @@
 #![cfg_attr(not(test), no_std)]
 
-mod error;
 mod register;
 
-use crate::error::Error;
 use crate::register::Register;
 
 #[cfg(not(feature = "async"))]
@@ -11,8 +9,8 @@ use embedded_hal::i2c::I2c;
 #[cfg(feature = "async")]
 use embedded_hal_async::i2c::I2c;
 
-const MANUFACTURE_ID: u16 = 0x5449;
-const DEVICE_ID: u16 = 0x2350;
+pub const MANUFACTURE_ID: u16 = 0x5449;
+pub const DEVICE_ID: u16 = 0x2350;
 
 #[derive(Debug)]
 pub struct INA2227<I2C> {
@@ -28,22 +26,34 @@ impl<I2C, E> INA2227<I2C>
 where
     I2C: I2c<Error = E>,
 {
-    pub async fn try_new(i2c: I2C, address: u8) -> Result<Self, Error<E>> {
-        let mut ina2227 = Self { i2c, address };
-
-        if ina2227.read_u16(Register::ManufacturerID).await? != MANUFACTURE_ID {
-            return Err(Error::InvalidManufacturerId);
-        }
-
-        if ina2227.read_u16(Register::DeviceID).await? != DEVICE_ID {
-            return Err(Error::InvalidDeviceId);
-        }
-
-        Ok(ina2227)
+    pub async fn new(i2c: I2C, address: u8) -> Self {
+        Self { i2c, address }
     }
 
     #[inline(always)]
-    async fn read_u16(&mut self, register: Register) -> Result<u16, Error<E>> {
+    pub async fn manufacturer_id(&mut self) -> Result<u16, E> {
+        self.read_u16(Register::ManufacturerID).await
+    }
+
+    #[inline(always)]
+    pub async fn is_manufacturer_id_ok(&mut self) -> bool {
+        self.manufacturer_id()
+            .await
+            .is_ok_and(|id| id == MANUFACTURE_ID)
+    }
+
+    #[inline(always)]
+    pub async fn device_id(&mut self) -> Result<u16, E> {
+        self.read_u16(Register::DeviceID).await
+    }
+
+    #[inline(always)]
+    pub async fn is_device_id_ok(&mut self) -> bool {
+        self.device_id().await.is_ok_and(|id| id == DEVICE_ID)
+    }
+
+    #[inline(always)]
+    async fn read_u16(&mut self, register: Register) -> Result<u16, E> {
         let mut buffer = [0u8; 2];
 
         self.i2c
@@ -51,32 +61,5 @@ where
             .await?;
 
         Ok(u16::from_be_bytes(buffer))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use embedded_hal::i2c::ErrorKind;
-    use embedded_hal_mock::eh1::i2c;
-
-    const DEFAULT_ADDRESS: u8 = 0x40;
-
-    #[test]
-    fn failure_to_read_manufacture_id_causes_error() {
-        let expectations = [i2c::Transaction::write_read(
-            DEFAULT_ADDRESS,
-            vec![Register::ManufacturerID as u8],
-            vec![0x00, 0x00],
-        )
-        .with_error(ErrorKind::Other)];
-        let mut i2c = i2c::Mock::new(&expectations);
-
-        assert_eq!(
-            Error::I2c(ErrorKind::Other),
-            INA2227::try_new(i2c.clone(), DEFAULT_ADDRESS).unwrap_err()
-        );
-
-        i2c.done();
     }
 }
